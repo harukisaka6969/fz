@@ -32,21 +32,25 @@
 - [Next.js 16](https://nextjs.org/)（App Router / Server Actions）
 - TypeScript / React 19
 - Tailwind CSS 4
-- Prisma 6 + SQLite
+- Prisma 6 + PostgreSQL（本番はSupabase推奨。ローカル開発はSQLiteに変更しても可）
 - bcryptjs（パスワードハッシュ）
 - 署名付きCookieによる独自セッション認証（管理者／顧客の2ロール）
 
 ## セットアップ
 
+DBはPostgreSQL前提です（本番はSupabaseを使用）。ローカルでも同じSupabaseプロジェクトに接続するか、ローカルのPostgresを用意してください。
+
 ```bash
 npm install
-cp .env.example .env        # 必要に応じて値を編集
+cp .env.example .env        # DATABASE_URL 等を編集
 npx prisma migrate deploy   # DBスキーマを適用
 npx prisma db seed          # サンプルデータを投入
 npm run dev
 ```
 
 `http://localhost:3000` にアクセスしてください。
+
+> SQLiteで手軽に試したい場合は `prisma/schema.prisma` の `datasource db` の `provider` を `sqlite` に、`.env` の `DATABASE_URL` を `file:./dev.db` に戻してください。
 
 ## ログイン情報（シードデータ）
 
@@ -57,6 +61,24 @@ npm run dev
 - 顧客: `customer02` / `customer1234`
 
 本番運用時は `.env` の `SESSION_SECRET` と管理者パスワードを必ず変更してください。
+
+## Vercelへのデプロイ
+
+本番用データベース（Supabase Postgres）は用意済みです。以下の手順でVercelにデプロイできます。
+
+1. [Vercel](https://vercel.com/new) にログインし、このGitHubリポジトリ（`harukisaka6969/fz`、ブランチ `claude/menesu-personal-homepage-f7p5m3` またはマージ後の `main`）をImportする。
+2. 「Environment Variables」に以下を設定する。
+   - `DATABASE_URL` — SupabaseダッシュボードのProject Settings → Database → Connection string（**URI** / Session pooler推奨）からコピー。パスワードは `[YOUR-PASSWORD]` の部分をプロジェクト作成時に発行された実際のパスワードに置き換える。
+     - プロジェクトRef: `wwmvtgcfipfsknmxywtm`（リージョン: ap-northeast-1）
+     - 例: `postgresql://postgres.wwmvtgcfipfsknmxywtm:<PASSWORD>@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true`
+     - パスワードを紛失した場合はSupabaseダッシュボードでリセットできます。
+   - `SESSION_SECRET` — 長いランダム文字列（例: `openssl rand -base64 32` で生成）
+   - `SEED_ADMIN_USERNAME` / `SEED_ADMIN_PASSWORD` — 任意（シード実行時のみ使用）
+3. 「Deploy」を押す。ビルド時に `postinstall` で `prisma generate` が自動実行されます。
+4. データベースのテーブル・初期データはすでにSupabase側に投入済みなので、追加の migrate/seed 操作は不要です（スキーマを変更した場合は `npx prisma migrate deploy` をローカルまたはCIから実行してください）。
+5. デプロイ完了後、発行されたURLにアクセスして動作確認してください。
+
+⚠️ **Supabaseのセキュリティに関する注意**: このアプリはPrisma経由でPostgresに直接接続しており、Supabaseのanon key／REST API（PostgREST）は使用していません。そのため各テーブルのRow Level Security（RLS）は現状無効のままでも、anon keyを使ったクライアントからの不正アクセス経路はありません。ただし、将来Supabaseのクライアントライブラリやanon keyをこのプロジェクトで使う場合は、先にRLSを有効化しポリシーを設定してください。
 
 ## ディレクトリ構成
 
