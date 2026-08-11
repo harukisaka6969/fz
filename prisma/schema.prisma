@@ -1,0 +1,157 @@
+// Prisma schema for the therapist personal homepage (admin + customer portal)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+/// Singleton-ish profile of the therapist herself. In practice only one row is used.
+model Therapist {
+  id           String   @id @default(cuid())
+  name         String
+  catchCopy    String
+  bio          String
+  age          Int?
+  height       Int?
+  bodyType     String?
+  bloodType    String?
+  areaOfWork   String?
+  workingHours String?
+  photoUrl     String?
+  snsUrl       String?
+  updatedAt    DateTime @updatedAt
+}
+
+model Customer {
+  id           String   @id @default(cuid())
+  loginId      String   @unique
+  passwordHash String
+  name         String
+  phone        String?
+  email        String?
+  adminNote    String?
+  createdAt    DateTime @default(now())
+
+  coupons   Coupon[]
+  invoices  Invoice[]
+  histories TreatmentHistory[]
+  reviews   Review[]
+  messages  Message[]
+}
+
+model MenuItem {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  durationMin Int
+  price       Int
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  invoiceItems       InvoiceItem[]
+  treatmentHistories TreatmentHistory[]
+}
+
+enum DiscountType {
+  PERCENT
+  AMOUNT
+}
+
+model Coupon {
+  id            String       @id @default(cuid())
+  code          String       @unique
+  title         String
+  description   String
+  discountType  DiscountType
+  discountValue Int
+  validFrom     DateTime
+  validTo       DateTime
+  isActive      Boolean      @default(true)
+  customerId    String?
+  customer      Customer?    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  createdAt     DateTime     @default(now())
+}
+
+enum InvoiceStatus {
+  UNPAID
+  PAID
+  CANCELED
+}
+
+model Invoice {
+  id         String        @id @default(cuid())
+  customerId String
+  customer   Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  title      String
+  discount   Int           @default(0)
+  status     InvoiceStatus @default(UNPAID)
+  issuedAt   DateTime      @default(now())
+  dueAt      DateTime?
+  paidAt     DateTime?
+  note       String?
+  items      InvoiceItem[]
+}
+
+model InvoiceItem {
+  id         String    @id @default(cuid())
+  invoiceId  String
+  invoice    Invoice   @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  menuItemId String?
+  menuItem   MenuItem? @relation(fields: [menuItemId], references: [id])
+  name       String
+  price      Int
+  quantity   Int       @default(1)
+}
+
+model TreatmentHistory {
+  id          String    @id @default(cuid())
+  customerId  String
+  customer    Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  menuItemId  String?
+  menuItem    MenuItem? @relation(fields: [menuItemId], references: [id])
+  date        DateTime
+  durationMin Int
+  price       Int
+  note        String?
+  createdAt   DateTime  @default(now())
+}
+
+model Review {
+  id          String    @id @default(cuid())
+  customerId  String
+  customer    Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  rating      Int
+  comment     String
+  reply       String?
+  repliedAt   DateTime?
+  isPublished Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+}
+
+enum SenderType {
+  ADMIN
+  CUSTOMER
+}
+
+model Message {
+  id             String     @id @default(cuid())
+  customerId     String
+  customer       Customer   @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  sender         SenderType
+  body           String
+  readByAdmin    Boolean    @default(false)
+  readByCustomer Boolean    @default(false)
+  createdAt      DateTime   @default(now())
+}
