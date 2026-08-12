@@ -26,7 +26,7 @@ export default async function AdminCustomerMessagesPage({
 
   return (
     <div className="space-y-6">
-      <PageHeader title={`${customer.name} さんとのメッセージ`} />
+      <PageHeader title={`${customer.name}とのメッセージ`} />
 
       <Card>
         {messages.length === 0 ? (

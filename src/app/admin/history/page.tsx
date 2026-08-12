@@ -43,7 +43,7 @@ export default async function AdminHistoryPage({
         </Link>
         {filteredCustomer && (
           <span className="rounded-full bg-brand-100 px-3 py-1 font-semibold text-brand-700">
-            {filteredCustomer.name} 様の履歴のみ表示中
+            {filteredCustomer.name}の履歴のみ表示中
           </span>
         )}
       </div>
@@ -56,7 +56,7 @@ export default async function AdminHistoryPage({
             <Card key={h.id} className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-sm font-semibold text-brand-900">
-                  {formatDate(h.date)} ・ {h.customer.name} 様
+                  {formatDate(h.date)} ・ {h.customer.name}
                 </p>
                 <p className="text-sm text-brand-600">
                   {h.menuItem?.name ?? "施術"} ・ {h.durationMin}分 ・ {formatYen(h.price)}

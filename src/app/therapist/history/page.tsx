@@ -74,7 +74,7 @@ export default async function TherapistHistoryPage() {
               return (
                 <div key={customer.id} className="rounded-xl border border-brand-100 p-4">
                   <div className="flex items-baseline justify-between">
-                    <p className="font-semibold text-brand-900">{customer.name} 様</p>
+                    <p className="font-semibold text-brand-900">{customer.name}</p>
                     <p className="text-xs text-brand-500">
                       {customerBookings.length}回 ・ 累計 {formatYen(customerRevenue)}
                     </p>

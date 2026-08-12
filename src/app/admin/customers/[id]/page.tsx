@@ -35,7 +35,7 @@ export default async function AdminCustomerDetailPage({
 
   return (
     <div className="space-y-6">
-      <PageHeader title={`${customer.name} さんの詳細`} />
+      <PageHeader title={`${customer.name}の詳細`} />
 
       <div className="grid gap-3 sm:grid-cols-3">
         <InfoRow label="ログインID" value={customer.loginId} />

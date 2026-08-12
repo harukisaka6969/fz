@@ -47,7 +47,7 @@ export default async function AdminCouponsPage() {
                     </span>
                   </p>
                   <p className="mt-1 text-xs text-brand-500">
-                    対象: {coupon.customer ? `${coupon.customer.name} 様限定` : "全顧客"}
+                    対象: {coupon.customer ? `${coupon.customer.name}限定` : "全顧客"}
                   </p>
                 </div>
                 <div className="flex shrink-0 gap-2">

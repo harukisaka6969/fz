@@ -110,7 +110,7 @@ export default async function TherapistCalendarPage() {
                     {b.endAt.toTimeString().slice(0, 5)}
                   </p>
                   <p className="text-brand-600">
-                    {b.customer.name} 様 ・ {b.menuItem?.name ?? "施術"}
+                    {b.customer.name} ・ {b.menuItem?.name ?? "施術"}
                   </p>
                 </div>
                 <form action={cancelOwnBookingAction}>
