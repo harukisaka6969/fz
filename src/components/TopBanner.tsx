@@ -21,6 +21,10 @@ export default function TopBanner({
 }) {
   const pathname = usePathname();
 
+  const activeHref = tabs
+    .filter((tab) => pathname === tab.href || pathname.startsWith(tab.href + "/"))
+    .sort((a, b) => b.href.length - a.href.length)[0]?.href;
+
   return (
     <header className="sticky top-0 z-50 border-b border-brand-100 bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
@@ -43,9 +47,7 @@ export default function TopBanner({
       </div>
       <nav className="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-2 pb-2">
         {tabs.map((tab) => {
-          const active =
-            pathname === tab.href ||
-            (tab.href !== "/" && pathname.startsWith(tab.href + "/"));
+          const active = tab.href === activeHref;
           return (
             <Link
               key={tab.href}
