@@ -14,12 +14,10 @@ function num(formData: FormData, key: string): number {
   return Number(formData.get(key) ?? 0);
 }
 
-// ---------- Profile ----------
+// ---------- Therapists ----------
 
-export async function updateTherapistProfileAction(formData: FormData) {
-  await requireAdmin();
-
-  const data = {
+function therapistData(formData: FormData) {
+  return {
     name: str(formData, "name"),
     catchCopy: str(formData, "catchCopy"),
     bio: str(formData, "bio"),
@@ -32,17 +30,77 @@ export async function updateTherapistProfileAction(formData: FormData) {
     photoUrl: str(formData, "photoUrl") || null,
     snsUrl: str(formData, "snsUrl") || null,
   };
+}
 
-  const existing = await prisma.therapist.findFirst();
-  if (existing) {
-    await prisma.therapist.update({ where: { id: existing.id }, data });
-  } else {
-    await prisma.therapist.create({ data });
-  }
+export async function createTherapistAction(formData: FormData) {
+  await requireAdmin();
 
-  revalidatePath("/admin/profile");
+  const count = await prisma.therapist.count();
+  await prisma.therapist.create({
+    data: { ...therapistData(formData), sortOrder: count },
+  });
+
+  revalidatePath("/admin/therapists");
   revalidatePath("/mypage");
+}
+
+export async function updateTherapistAction(formData: FormData) {
+  await requireAdmin();
+  const id = str(formData, "id");
+  if (!id) return;
+
+  await prisma.therapist.update({ where: { id }, data: therapistData(formData) });
+
+  revalidatePath("/admin/therapists");
+  revalidatePath(`/admin/therapists/${id}`);
+  revalidatePath("/mypage");
+  revalidatePath(`/mypage/therapists/${id}`);
   revalidatePath("/");
+}
+
+export async function deleteTherapistAction(formData: FormData) {
+  await requireAdmin();
+  const id = str(formData, "id");
+  await prisma.therapist.delete({ where: { id } }).catch(() => {});
+  revalidatePath("/admin/therapists");
+  revalidatePath("/mypage");
+}
+
+// ---------- Blog ----------
+
+export async function createBlogPostAction(formData: FormData) {
+  await requireAdmin();
+
+  const therapistId = str(formData, "therapistId");
+  const title = str(formData, "title");
+  const body = str(formData, "body");
+  if (!therapistId || !title || !body) return;
+
+  await prisma.blogPost.create({ data: { therapistId, title, body } });
+
+  revalidatePath("/admin/blog");
+  revalidatePath("/mypage/blog");
+}
+
+export async function toggleBlogPostPublishedAction(formData: FormData) {
+  await requireAdmin();
+  const id = str(formData, "id");
+  const post = await prisma.blogPost.findUnique({ where: { id } });
+  if (!post) return;
+  await prisma.blogPost.update({
+    where: { id },
+    data: { isPublished: !post.isPublished },
+  });
+  revalidatePath("/admin/blog");
+  revalidatePath("/mypage/blog");
+}
+
+export async function deleteBlogPostAction(formData: FormData) {
+  await requireAdmin();
+  const id = str(formData, "id");
+  await prisma.blogPost.delete({ where: { id } }).catch(() => {});
+  revalidatePath("/admin/blog");
+  revalidatePath("/mypage/blog");
 }
 
 // ---------- Customers ----------
@@ -55,30 +113,34 @@ export async function createCustomerAction(formData: FormData) {
   const name = str(formData, "name");
   if (!loginId || !password || !name) return;
 
-  await prisma.customer.create({
+  const adminNote = str(formData, "adminNote");
+
+  const created = await prisma.customer.create({
     data: {
       loginId,
       passwordHash: await hashPassword(password),
       name,
       phone: str(formData, "phone") || null,
       email: str(formData, "email") || null,
-      adminNote: str(formData, "adminNote") || null,
     },
   });
+
+  if (adminNote) {
+    await prisma.customerNote.create({
+      data: { customerId: created.id, body: adminNote },
+    });
+  }
 
   revalidatePath("/admin");
 }
 
-export async function updateCustomerNoteAction(formData: FormData) {
+export async function createCustomerNoteAction(formData: FormData) {
   await requireAdmin();
   const customerId = str(formData, "customerId");
-  const adminNote = str(formData, "adminNote");
-  if (!customerId) return;
+  const body = str(formData, "body");
+  if (!customerId || !body) return;
 
-  await prisma.customer.update({
-    where: { id: customerId },
-    data: { adminNote: adminNote || null },
-  });
+  await prisma.customerNote.create({ data: { customerId, body } });
 
   revalidatePath(`/admin/customers/${customerId}`);
 }
@@ -211,6 +273,27 @@ export async function sendAdminMessageAction(formData: FormData) {
 
   revalidatePath("/admin/messages");
   revalidatePath(`/admin/customers/${customerId}`);
+  revalidatePath("/mypage/messages");
+}
+
+export async function sendBroadcastMessageAction(formData: FormData) {
+  await requireAdmin();
+  const body = str(formData, "body");
+  if (!body) return;
+
+  const customers = await prisma.customer.findMany({ select: { id: true } });
+  if (customers.length === 0) return;
+
+  await prisma.message.createMany({
+    data: customers.map((c) => ({
+      customerId: c.id,
+      sender: "ADMIN" as const,
+      body,
+      readByAdmin: true,
+    })),
+  });
+
+  revalidatePath("/admin/messages");
   revalidatePath("/mypage/messages");
 }
 

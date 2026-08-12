@@ -36,3 +36,17 @@ export async function postReviewAction(formData: FormData) {
   revalidatePath("/mypage/reviews");
   revalidatePath("/admin/reviews");
 }
+
+/// A customer's private note about a therapist. Only visible to that customer, never to the therapist/admin.
+export async function createTherapistNoteAction(formData: FormData) {
+  const customer = await requireCustomer();
+  const therapistId = String(formData.get("therapistId") ?? "").trim();
+  const body = String(formData.get("body") ?? "").trim();
+  if (!therapistId || !body) return;
+
+  await prisma.therapistNote.create({
+    data: { customerId: customer.id, therapistId, body },
+  });
+
+  revalidatePath(`/mypage/therapists/${therapistId}`);
+}

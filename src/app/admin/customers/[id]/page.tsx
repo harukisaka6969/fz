@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { updateCustomerNoteAction } from "@/lib/actions/admin-actions";
+import { createCustomerNoteAction } from "@/lib/actions/admin-actions";
 import {
   Card,
   EmptyState,
@@ -34,6 +34,7 @@ export default async function AdminCustomerDetailPage({
       },
       reviews: { orderBy: { createdAt: "desc" }, take: 3 },
       messages: { orderBy: { createdAt: "desc" }, take: 3 },
+      notes: { orderBy: { createdAt: "desc" } },
     },
   });
 
@@ -74,15 +75,30 @@ export default async function AdminCustomerDetailPage({
         <h2 className="mb-3 text-sm font-bold text-brand-900">
           管理者メモ（お客様には表示されません）
         </h2>
-        <form action={updateCustomerNoteAction} className="space-y-3">
+        {customer.notes.length === 0 ? (
+          <p className="mb-3 text-sm text-brand-400">まだメモがありません。</p>
+        ) : (
+          <ul className="mb-4 space-y-2">
+            {customer.notes.map((note) => (
+              <li key={note.id} className="rounded-lg bg-brand-50 px-3 py-2 text-sm text-brand-800">
+                <p className="whitespace-pre-wrap">{note.body}</p>
+                <p className="mt-1 text-[10px] text-brand-400">
+                  {formatDate(note.createdAt)}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+        <form action={createCustomerNoteAction} className="space-y-3">
           <input type="hidden" name="customerId" value={customer.id} />
           <textarea
-            name="adminNote"
-            defaultValue={customer.adminNote ?? ""}
+            name="body"
+            required
+            placeholder="新しいメモを追加"
             rows={3}
             className="w-full rounded-lg border border-brand-200 bg-white px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200"
           />
-          <SubmitButton>メモを保存</SubmitButton>
+          <SubmitButton>メモを追加</SubmitButton>
         </form>
       </Card>
 

@@ -18,12 +18,13 @@ export default async function MypageLayout({
   });
 
   const tabs = [
-    { href: "/mypage", label: "プロフィール" },
+    { href: "/mypage", label: "セラピスト" },
     { href: "/mypage/menu", label: "施術メニュー" },
     { href: "/mypage/coupons", label: "クーポン" },
     { href: "/mypage/history", label: "施術履歴" },
     { href: "/mypage/billing", label: "請求" },
     { href: "/mypage/reviews", label: "レビュー" },
+    { href: "/mypage/blog", label: "ブログ" },
     { href: "/mypage/messages", label: "メッセージ", badge: unreadMessages },
   ];
 

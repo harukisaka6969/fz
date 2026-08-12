@@ -16,21 +16,69 @@ async function main() {
     },
   });
 
+  await prisma.blogPost.deleteMany();
+  await prisma.therapistNote.deleteMany();
   await prisma.therapist.deleteMany();
-  await prisma.therapist.create({
-    data: {
-      name: "めぐ",
-      catchCopy: "癒しのひとときを、あなたに。",
-      bio: "はじめまして、めぐです。お客様一人ひとりの疲れやお悩みに寄り添い、心と体の両方をほぐす施術を心がけています。当日の体調やご要望に合わせて力加減を調整しますので、お気軽にメッセージでお伝えください。",
-      age: 26,
-      height: 160,
-      bodyType: "普通",
-      bloodType: "A型",
-      areaOfWork: "都内近郊 出張対応",
-      workingHours: "平日 13:00〜22:00 / 土日 11:00〜20:00",
-      photoUrl: null,
-      snsUrl: "https://x.com/example",
-    },
+  const therapists = await Promise.all(
+    [
+      {
+        name: "めぐ",
+        catchCopy: "癒しのひとときを、あなたに。",
+        bio: "はじめまして、めぐです。お客様一人ひとりの疲れやお悩みに寄り添い、心と体の両方をほぐす施術を心がけています。当日の体調やご要望に合わせて力加減を調整しますので、お気軽にメッセージでお伝えください。",
+        age: 26,
+        height: 160,
+        bodyType: "普通",
+        bloodType: "A型",
+        areaOfWork: "都内近郊 出張対応",
+        workingHours: "平日 13:00〜22:00 / 土日 11:00〜20:00",
+        snsUrl: "https://x.com/example",
+        sortOrder: 1,
+      },
+      {
+        name: "りん",
+        catchCopy: "ゆっくり、じっくり、あなたのペースで。",
+        bio: "はじめまして、りんです。強い力よりも、ゆっくりと圧をかけていくスタイルが得意です。会話はあまり得意ではないので静かに過ごしたい方にもおすすめです。お悩みの部位があればぜひ教えてください。",
+        age: 24,
+        height: 158,
+        bodyType: "スレンダー",
+        bloodType: "O型",
+        areaOfWork: "都内近郊 出張対応",
+        workingHours: "平日 15:00〜23:00 / 土日 12:00〜21:00",
+        sortOrder: 2,
+      },
+      {
+        name: "さくら",
+        catchCopy: "元気と癒しをお届けします。",
+        bio: "さくらです！明るく元気にお迎えするのが得意です。会話を楽しみながらリラックスしていただけたら嬉しいです。指圧強めのしっかりコースが人気です。",
+        age: 29,
+        height: 163,
+        bodyType: "グラマー",
+        bloodType: "B型",
+        areaOfWork: "都内近郊 出張対応 / 一部店舗待機あり",
+        workingHours: "平日 12:00〜21:00 / 土日祝 10:00〜19:00",
+        sortOrder: 3,
+      },
+    ].map((t) => prisma.therapist.create({ data: t }))
+  );
+
+  await prisma.blogPost.createMany({
+    data: [
+      {
+        therapistId: therapists[0].id,
+        title: "夏の疲れ、たまっていませんか？",
+        body: "暑い日が続きますね。夏は冷房での冷えや寝苦しさで、気づかないうちに肩や首がガチガチになっている方が多いです。次回のご予約の際は、いつもより少し早めにいらしていただいて、ゆっくりお話を伺いながら施術できればと思います。",
+      },
+      {
+        therapistId: therapists[1].id,
+        title: "はじめまして、りんです",
+        body: "本日からブログを始めました。普段はゆっくりとした施術を心がけています。緊張しやすい方、力加減が心配な方もお気軽にメッセージでご相談ください。",
+      },
+      {
+        therapistId: therapists[2].id,
+        title: "新メニューについてのお知らせ",
+        body: "いつもありがとうございます！近々、新しいコースを追加予定です。詳細が決まり次第こちらでお知らせしますので楽しみにしていてくださいね。",
+      },
+    ],
   });
 
   const customer = await prisma.customer.upsert({
@@ -42,7 +90,14 @@ async function main() {
       name: "田中様",
       phone: "090-1234-5678",
       email: "tanaka@example.com",
-      adminNote: "力加減は強めが好み。香りはラベンダー希望。",
+    },
+  });
+
+  await prisma.customerNote.deleteMany();
+  await prisma.customerNote.create({
+    data: {
+      customerId: customer.id,
+      body: "力加減は強めが好み。香りはラベンダー希望。",
     },
   });
 

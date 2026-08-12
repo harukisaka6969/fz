@@ -17,7 +17,6 @@ model Admin {
   createdAt    DateTime @default(now())
 }
 
-/// Singleton-ish profile of the therapist herself. In practice only one row is used.
 model Therapist {
   id           String   @id @default(cuid())
   name         String
@@ -31,7 +30,12 @@ model Therapist {
   workingHours String?
   photoUrl     String?
   snsUrl       String?
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  notes     TherapistNote[]
+  blogPosts BlogPost[]
 }
 
 model Customer {
@@ -41,14 +45,46 @@ model Customer {
   name         String
   phone        String?
   email        String?
-  adminNote    String?
   createdAt    DateTime @default(now())
 
-  coupons   Coupon[]
-  invoices  Invoice[]
-  histories TreatmentHistory[]
-  reviews   Review[]
-  messages  Message[]
+  coupons        Coupon[]
+  invoices       Invoice[]
+  histories      TreatmentHistory[]
+  reviews        Review[]
+  messages       Message[]
+  notes          CustomerNote[]
+  therapistNotes TherapistNote[]
+}
+
+/// Admin's private notes about a customer. Never shown to the customer.
+model CustomerNote {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  body       String
+  createdAt  DateTime @default(now())
+}
+
+/// A customer's private notes about a therapist. Never shown to the therapist/admin.
+model TherapistNote {
+  id          String    @id @default(cuid())
+  customerId  String
+  customer    Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  therapistId String
+  therapist   Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  body        String
+  createdAt   DateTime  @default(now())
+}
+
+model BlogPost {
+  id          String    @id @default(cuid())
+  therapistId String
+  therapist   Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  title       String
+  body        String
+  isPublished Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model MenuItem {

@@ -15,10 +15,11 @@ export default async function AdminLayout({
 
   const tabs = [
     { href: "/admin", label: "顧客一覧" },
-    { href: "/admin/profile", label: "プロフィール" },
+    { href: "/admin/therapists", label: "セラピスト" },
     { href: "/admin/menu", label: "施術メニュー" },
     { href: "/admin/coupons", label: "クーポン" },
     { href: "/admin/reviews", label: "レビュー" },
+    { href: "/admin/blog", label: "ブログ" },
     { href: "/admin/messages", label: "メッセージ", badge: unreadMessages },
     { href: "/admin/billing", label: "請求" },
     { href: "/admin/history", label: "施術履歴" },

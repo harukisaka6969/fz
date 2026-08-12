@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { Card, EmptyState, PageHeader } from "@/components/ui";
+import { sendBroadcastMessageAction } from "@/lib/actions/admin-actions";
+import { Card, EmptyState, PageHeader, SubmitButton } from "@/components/ui";
 import { formatDateTime } from "@/lib/format";
 
 export default async function AdminMessagesPage() {
@@ -29,6 +30,23 @@ export default async function AdminMessagesPage() {
         title="メッセージ"
         description="お客様ごとのやり取りを確認・返信できます。"
       />
+
+      <Card>
+        <h2 className="mb-3 text-sm font-bold text-brand-900">全員に一斉送信</h2>
+        <p className="mb-3 text-xs text-brand-500">
+          登録されている全てのお客様に、同じメッセージを一度に送信します。
+        </p>
+        <form action={sendBroadcastMessageAction} className="space-y-3">
+          <textarea
+            name="body"
+            required
+            rows={3}
+            placeholder="全員へのお知らせを入力"
+            className="w-full rounded-lg border border-brand-200 bg-white px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200"
+          />
+          <SubmitButton>全員に送信</SubmitButton>
+        </form>
+      </Card>
 
       {sorted.length === 0 ? (
         <EmptyState>まだ顧客が登録されていません。</EmptyState>

@@ -4,7 +4,9 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const therapist = await prisma.therapist.findFirst();
+  const therapists = await prisma.therapist.findMany({
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+  });
 
   return (
     <main className="flex flex-1 flex-col bg-brand-50">
@@ -13,10 +15,12 @@ export default async function Home() {
           Personal Salon
         </p>
         <h1 className="mt-3 text-3xl font-bold text-brand-900 sm:text-4xl">
-          {therapist?.name ?? "めぐ"}
+          めぐSalon
         </h1>
-        {therapist?.catchCopy && (
-          <p className="mt-3 max-w-md text-brand-700">{therapist.catchCopy}</p>
+        {therapists.length > 0 && (
+          <p className="mt-3 max-w-md text-brand-700">
+            {therapists.map((t) => t.name).join(" / ")} が在籍しています。
+          </p>
         )}
 
         <div className="mt-10 grid w-full max-w-md gap-4 sm:grid-cols-2">
