@@ -63,6 +63,74 @@ export async function createAvailabilityRuleAction(formData: FormData) {
   revalidatePath("/mypage/book");
 }
 
+function fmtHour(hour: number): string {
+  return `${String(hour).padStart(2, "0")}:00`;
+}
+
+/// Replaces this therapist's entire weekly availability with the hour cells selected
+/// in the tap-to-toggle grid, merging consecutive hours per day into ranges.
+export async function saveWeeklyAvailabilityAction(formData: FormData) {
+  const therapist = await requireTherapist();
+
+  const startDateRaw = str(formData, "startDate");
+  const endDateRaw = str(formData, "endDate");
+  if (!startDateRaw || !endDateRaw) return;
+
+  let selectedKeys: string[] = [];
+  try {
+    selectedKeys = JSON.parse(str(formData, "slots") || "[]");
+  } catch {
+    return;
+  }
+
+  const hoursByDay = new Map<number, number[]>();
+  for (const key of selectedKeys) {
+    const [dayStr, hourStr] = key.split("-");
+    const day = Number(dayStr);
+    const hour = Number(hourStr);
+    if (!Number.isInteger(day) || !Number.isInteger(hour)) continue;
+    if (!hoursByDay.has(day)) hoursByDay.set(day, []);
+    hoursByDay.get(day)!.push(hour);
+  }
+
+  const ranges: { dayOfWeek: number; startTime: string; endTime: string }[] = [];
+  for (const [day, hours] of hoursByDay) {
+    const sorted = [...hours].sort((a, b) => a - b);
+    let rangeStart: number | null = null;
+    let prev: number | null = null;
+    for (const hour of sorted) {
+      if (rangeStart === null) {
+        rangeStart = hour;
+      } else if (prev !== null && hour !== prev + 1) {
+        ranges.push({ dayOfWeek: day, startTime: fmtHour(rangeStart), endTime: fmtHour(prev + 1) });
+        rangeStart = hour;
+      }
+      prev = hour;
+    }
+    if (rangeStart !== null && prev !== null) {
+      ranges.push({ dayOfWeek: day, startTime: fmtHour(rangeStart), endTime: fmtHour(prev + 1) });
+    }
+  }
+
+  await prisma.availabilityRule.deleteMany({ where: { therapistId: therapist.id } });
+
+  if (ranges.length > 0) {
+    await prisma.availabilityRule.createMany({
+      data: ranges.map((r) => ({
+        therapistId: therapist.id,
+        dayOfWeek: r.dayOfWeek,
+        startTime: r.startTime,
+        endTime: r.endTime,
+        startDate: new Date(startDateRaw),
+        endDate: new Date(endDateRaw),
+      })),
+    });
+  }
+
+  revalidatePath("/therapist/calendar");
+  revalidatePath("/mypage/book");
+}
+
 export async function deleteAvailabilityRuleAction(formData: FormData) {
   const therapist = await requireTherapist();
   const id = str(formData, "id");

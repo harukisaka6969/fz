@@ -8,8 +8,19 @@ import {
 } from "@/lib/actions/therapist-actions";
 import { Card, EmptyState, PageHeader, SubmitButton } from "@/components/ui";
 import { formatDate, formatDateTime } from "@/lib/format";
+import WeeklyAvailabilityGrid from "./WeeklyAvailabilityGrid";
 
 const DAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
+
+function ruleToHourKeys(rule: { dayOfWeek: number; startTime: string; endTime: string }): string[] {
+  const startHour = Number(rule.startTime.split(":")[0]);
+  const endHour = Number(rule.endTime.split(":")[0]);
+  const keys: string[] = [];
+  for (let h = startHour; h < endHour; h++) {
+    keys.push(`${rule.dayOfWeek}-${h}`);
+  }
+  return keys;
+}
 
 export default async function TherapistCalendarPage() {
   const therapist = await requireTherapist();
@@ -46,6 +57,8 @@ export default async function TherapistCalendarPage() {
       notes: notes.filter((n) => n.customerId === customerId),
     };
   });
+
+  const initialSelected = rules.flatMap(ruleToHourKeys);
 
   return (
     <div className="space-y-6">
@@ -139,6 +152,11 @@ export default async function TherapistCalendarPage() {
             ))}
           </div>
         )}
+      </Card>
+
+      <Card>
+        <h2 className="mb-3 text-sm font-bold text-brand-900">週間カレンダーで出勤時間を設定</h2>
+        <WeeklyAvailabilityGrid initialSelected={initialSelected} />
       </Card>
 
       <Card>
