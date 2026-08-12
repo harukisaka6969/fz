@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "めぐ Personal Salon",
+  title: "Personal Salon",
   description: "個人セラピストの予約・メッセージ管理ポータル",
 };
 

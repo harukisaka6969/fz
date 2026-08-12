@@ -15,7 +15,10 @@ export default async function MypageBookPage({
   const { therapist: therapistId = "", menu: menuItemId = "" } = await searchParams;
 
   const [therapists, menuItems, myBookings] = await Promise.all([
-    prisma.therapist.findMany({ orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] }),
+    prisma.therapist.findMany({
+      where: { isVerified: true },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+    }),
     prisma.menuItem.findMany({ where: { isActive: true }, orderBy: { sortOrder: "asc" } }),
     prisma.booking.findMany({
       where: { customerId: customer.id, status: "CONFIRMED", startAt: { gte: new Date() } },

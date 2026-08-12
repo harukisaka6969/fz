@@ -77,6 +77,13 @@ export async function loginTherapistAction(
     return { error: "ログインIDまたはパスワードが正しくありません。" };
   }
 
+  if (!therapist.isVerified) {
+    await prisma.therapist.update({
+      where: { id: therapist.id },
+      data: { isVerified: true },
+    });
+  }
+
   await createSession("therapist", therapist.id);
   redirect("/therapist");
 }

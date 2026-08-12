@@ -59,6 +59,9 @@ export async function bookSlotAction(formData: FormData) {
   const endAtRaw = String(formData.get("endAt") ?? "").trim();
   if (!therapistId || !menuItemId || !startAtRaw || !endAtRaw) return;
 
+  const therapist = await prisma.therapist.findUnique({ where: { id: therapistId } });
+  if (!therapist || !therapist.isVerified) return;
+
   const startAt = new Date(startAtRaw);
   const endAt = new Date(endAtRaw);
 

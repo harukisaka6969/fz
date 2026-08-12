@@ -22,7 +22,7 @@ export default async function MypageTherapistDetailPage({
     }),
   ]);
 
-  if (!therapist) notFound();
+  if (!therapist || !therapist.isVerified) notFound();
 
   const details = [
     ["年齢", therapist.age ? `${therapist.age}歳` : null],

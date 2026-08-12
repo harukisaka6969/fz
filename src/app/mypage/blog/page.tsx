@@ -5,7 +5,7 @@ import { formatDate } from "@/lib/format";
 
 export default async function MypageBlogPage() {
   const posts = await prisma.blogPost.findMany({
-    where: { isPublished: true },
+    where: { isPublished: true, therapist: { isVerified: true } },
     orderBy: { createdAt: "desc" },
     include: { therapist: true },
   });

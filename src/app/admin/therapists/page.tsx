@@ -19,7 +19,18 @@ export default async function AdminTherapistsPage() {
         {therapists.map((t) => (
           <Link key={t.id} href={`/admin/therapists/${t.id}`}>
             <Card className="h-full transition hover:border-brand-300 hover:shadow-md">
-              <p className="font-semibold text-brand-900">{t.name}</p>
+              <div className="flex items-center justify-between">
+                <p className="font-semibold text-brand-900">{t.name}</p>
+                <span
+                  className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                    t.isVerified
+                      ? "bg-emerald-100 text-emerald-700"
+                      : "bg-neutral-200 text-neutral-600"
+                  }`}
+                >
+                  {t.isVerified ? "認証済み・お客様に公開中" : "未認証・非公開"}
+                </span>
+              </div>
               <p className="mt-1 text-sm text-brand-600">{t.catchCopy}</p>
               <p className="mt-2 line-clamp-2 text-xs text-brand-500">{t.bio}</p>
             </Card>

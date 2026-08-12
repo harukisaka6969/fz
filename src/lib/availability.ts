@@ -34,6 +34,7 @@ export async function getAvailableSlots({
       ...(therapistId ? { therapistId } : {}),
       startDate: { lte: rangeEnd },
       endDate: { gte: now },
+      therapist: { isVerified: true },
     },
     include: { therapist: true },
   });

@@ -4,6 +4,7 @@ import { Card, EmptyState, PageHeader } from "@/components/ui";
 
 export default async function MypageTherapistsPage() {
   const therapists = await prisma.therapist.findMany({
+    where: { isVerified: true },
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
   });
 

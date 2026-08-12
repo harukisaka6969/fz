@@ -1,13 +1,6 @@
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
 
-export const dynamic = "force-dynamic";
-
-export default async function Home() {
-  const therapists = await prisma.therapist.findMany({
-    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-  });
-
+export default function Home() {
   return (
     <main className="flex flex-1 flex-col bg-brand-50">
       <section className="flex flex-1 flex-col items-center justify-center px-4 py-20 text-center">
@@ -15,13 +8,11 @@ export default async function Home() {
           Personal Salon
         </p>
         <h1 className="mt-3 text-3xl font-bold text-brand-900 sm:text-4xl">
-          めぐSalon
+          セラピスト予約サイト
         </h1>
-        {therapists.length > 0 && (
-          <p className="mt-3 max-w-md text-brand-700">
-            {therapists.map((t) => t.name).join(" / ")} が在籍しています。
-          </p>
-        )}
+        <p className="mt-3 max-w-md text-brand-700">
+          お客様・セラピストそれぞれの専用ページからログインしてください。
+        </p>
 
         <div className="mt-10 grid w-full max-w-md gap-4 sm:grid-cols-3">
           <Link

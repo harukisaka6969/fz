@@ -14,7 +14,7 @@ export default async function MypageBlogDetailPage({
     include: { therapist: true },
   });
 
-  if (!post || !post.isPublished) notFound();
+  if (!post || !post.isPublished || !post.therapist.isVerified) notFound();
 
   return (
     <div className="space-y-6">
