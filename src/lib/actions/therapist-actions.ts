@@ -212,7 +212,7 @@ export async function createOwnCustomerNoteAction(formData: FormData) {
     data: { customerId, therapistId: therapist.id, body },
   });
 
-  revalidatePath("/therapist/calendar");
+  revalidatePath("/therapist/history");
 }
 
 export type RegisterCustomerState = {

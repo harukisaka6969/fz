@@ -12,6 +12,7 @@ export default async function TherapistLayout({
     { href: "/therapist", label: "プロフィール" },
     { href: "/therapist/customers", label: "お客様" },
     { href: "/therapist/calendar", label: "カレンダー" },
+    { href: "/therapist/history", label: "施術履歴" },
     { href: "/therapist/blog", label: "ブログ" },
   ];
 
