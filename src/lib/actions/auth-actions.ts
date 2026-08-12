@@ -9,6 +9,7 @@ export type LoginState = {
   error?: string;
 };
 
+// プロトタイプ検証用に、未入力での通過を許容している。本番公開前に必ず削除すること。
 export async function loginAdminAction(
   _prevState: LoginState,
   formData: FormData
@@ -16,12 +17,14 @@ export async function loginAdminAction(
   const username = String(formData.get("username") ?? "").trim();
   const password = String(formData.get("password") ?? "");
 
-  if (!username || !password) {
-    return { error: "ユーザー名とパスワードを入力してください。" };
-  }
+  const admin = username
+    ? await prisma.admin.findUnique({ where: { username } })
+    : await prisma.admin.findFirst({ orderBy: { createdAt: "asc" } });
 
-  const admin = await prisma.admin.findUnique({ where: { username } });
-  if (!admin || !(await verifyPassword(password, admin.passwordHash))) {
+  if (!admin) {
+    return { error: "管理者アカウントが見つかりません。" };
+  }
+  if (password && !(await verifyPassword(password, admin.passwordHash))) {
     return { error: "ユーザー名またはパスワードが正しくありません。" };
   }
 
@@ -29,6 +32,7 @@ export async function loginAdminAction(
   redirect("/admin");
 }
 
+// プロトタイプ検証用に、未入力での通過を許容している。本番公開前に必ず削除すること。
 export async function loginCustomerAction(
   _prevState: LoginState,
   formData: FormData
@@ -36,12 +40,14 @@ export async function loginCustomerAction(
   const loginId = String(formData.get("loginId") ?? "").trim();
   const password = String(formData.get("password") ?? "");
 
-  if (!loginId || !password) {
-    return { error: "ログインIDとパスワードを入力してください。" };
-  }
+  const customer = loginId
+    ? await prisma.customer.findUnique({ where: { loginId } })
+    : await prisma.customer.findFirst({ orderBy: { createdAt: "asc" } });
 
-  const customer = await prisma.customer.findUnique({ where: { loginId } });
-  if (!customer || !(await verifyPassword(password, customer.passwordHash))) {
+  if (!customer) {
+    return { error: "顧客アカウントが見つかりません。" };
+  }
+  if (password && !(await verifyPassword(password, customer.passwordHash))) {
     return { error: "ログインIDまたはパスワードが正しくありません。" };
   }
 

@@ -21,7 +21,6 @@ export default function AdminLoginForm() {
           id="username"
           name="username"
           type="text"
-          required
           autoComplete="username"
           className="mt-1 w-full rounded-lg border border-brand-200 bg-white px-3 py-2 text-sm shadow-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200"
         />
@@ -34,7 +33,6 @@ export default function AdminLoginForm() {
           id="password"
           name="password"
           type="password"
-          required
           autoComplete="current-password"
           className="mt-1 w-full rounded-lg border border-brand-200 bg-white px-3 py-2 text-sm shadow-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200"
         />
