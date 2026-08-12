@@ -63,6 +63,20 @@ export async function createAvailabilityRuleAction(formData: FormData) {
   revalidatePath("/mypage/book");
 }
 
+export async function setBookingHorizonAction(formData: FormData) {
+  const therapist = await requireTherapist();
+  const weeks = num(formData, "weeks");
+  if (![0, 2, 3, 4].includes(weeks)) return;
+
+  await prisma.therapist.update({
+    where: { id: therapist.id },
+    data: { bookingHorizonWeeks: weeks },
+  });
+
+  revalidatePath("/therapist/calendar");
+  revalidatePath("/mypage/book");
+}
+
 function fmtHour(hour: number): string {
   return `${String(hour).padStart(2, "0")}:00`;
 }

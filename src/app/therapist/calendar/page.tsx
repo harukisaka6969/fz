@@ -5,6 +5,7 @@ import {
   deleteAvailabilityRuleAction,
   cancelOwnBookingAction,
   createOwnCustomerNoteAction,
+  setBookingHorizonAction,
 } from "@/lib/actions/therapist-actions";
 import { Card, EmptyState, PageHeader, SubmitButton } from "@/components/ui";
 import { formatDate, formatDateTime } from "@/lib/format";
@@ -66,6 +67,52 @@ export default async function TherapistCalendarPage() {
         title="カレンダー"
         description="毎週の空き時間ルールと、確定している予約を確認できます。"
       />
+
+      <Card>
+        <h2 className="mb-1 text-sm font-bold text-brand-900">予約の受付期間</h2>
+        <p className="mb-3 text-xs text-brand-500">
+          お客様が予約できるのは、今日からここで設定した期間までです。現在:{" "}
+          <span className="font-semibold text-brand-700">
+            {therapist.bookingHorizonWeeks === 0
+              ? "予約を停止中"
+              : `${therapist.bookingHorizonWeeks}週間先まで`}
+          </span>
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {[
+            { weeks: 2, label: "2週間先まで受付" },
+            { weeks: 3, label: "3週間先まで受付" },
+            { weeks: 4, label: "4週間先まで受付" },
+          ].map(({ weeks, label }) => (
+            <form key={weeks} action={setBookingHorizonAction}>
+              <input type="hidden" name="weeks" value={weeks} />
+              <button
+                type="submit"
+                className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
+                  therapist.bookingHorizonWeeks === weeks
+                    ? "bg-brand-600 text-white"
+                    : "border border-brand-300 bg-white text-brand-700 hover:bg-brand-100"
+                }`}
+              >
+                {label}
+              </button>
+            </form>
+          ))}
+          <form action={setBookingHorizonAction}>
+            <input type="hidden" name="weeks" value={0} />
+            <button
+              type="submit"
+              className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
+                therapist.bookingHorizonWeeks === 0
+                  ? "bg-red-600 text-white"
+                  : "border border-red-200 bg-white text-red-600 hover:bg-red-50"
+              }`}
+            >
+              今は予約を制限する
+            </button>
+          </form>
+        </div>
+      </Card>
 
       <Card>
         <h2 className="mb-3 text-sm font-bold text-brand-900">今後の予約</h2>

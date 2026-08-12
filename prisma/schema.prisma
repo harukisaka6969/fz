@@ -18,27 +18,29 @@ model Admin {
 }
 
 model Therapist {
-  id           String   @id @default(cuid())
+  id                  String   @id @default(cuid())
   /// Set only for therapists onboarded with their own login (prototype: blank password bypass).
-  loginId      String?  @unique
-  passwordHash String?
-  name         String
-  catchCopy    String
-  bio          String
-  age          Int?
-  height       Int?
-  bodyType     String?
-  bloodType    String?
-  areaOfWork   String?
-  workingHours String?
-  photoUrl     String?
-  snsUrl       String?
-  sortOrder    Int      @default(0)
+  loginId             String?  @unique
+  passwordHash        String?
+  name                String
+  catchCopy           String
+  bio                 String
+  age                 Int?
+  height              Int?
+  bodyType            String?
+  bloodType           String?
+  areaOfWork          String?
+  workingHours        String?
+  photoUrl            String?
+  snsUrl              String?
+  sortOrder           Int      @default(0)
   /// Becomes true once the therapist has logged into her own account. Only verified
   /// therapists are visible to customers.
-  isVerified   Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  isVerified          Boolean  @default(false)
+  /// How many weeks ahead customers may book. 0 = new bookings are paused.
+  bookingHorizonWeeks Int      @default(2)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   notes               TherapistNote[]
   blogPosts           BlogPost[]

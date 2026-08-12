@@ -75,6 +75,10 @@ export async function bookSlotAction(formData: FormData) {
   const startAt = new Date(startAtRaw);
   const endAt = new Date(endAtRaw);
 
+  if (therapist.bookingHorizonWeeks <= 0) return;
+  const horizonEnd = new Date(Date.now() + therapist.bookingHorizonWeeks * 7 * 24 * 60 * 60 * 1000);
+  if (startAt < new Date() || startAt > horizonEnd) return;
+
   const overlapping = await prisma.booking.findFirst({
     where: {
       therapistId,
