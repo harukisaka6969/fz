@@ -27,7 +27,7 @@ export default async function AdminCustomerDetailPage({
       },
       reviews: { orderBy: { createdAt: "desc" }, take: 3 },
       messages: { orderBy: { createdAt: "desc" }, take: 3 },
-      notes: { orderBy: { createdAt: "desc" } },
+      notes: { orderBy: { createdAt: "desc" }, include: { therapist: true } },
     },
   });
 
@@ -60,7 +60,7 @@ export default async function AdminCustomerDetailPage({
 
       <Card>
         <h2 className="mb-3 text-sm font-bold text-brand-900">
-          管理者メモ（お客様には表示されません）
+          私用メモ（お客様には表示されません）
         </h2>
         {customer.notes.length === 0 ? (
           <p className="mb-3 text-sm text-brand-400">まだメモがありません。</p>
@@ -70,6 +70,7 @@ export default async function AdminCustomerDetailPage({
               <li key={note.id} className="rounded-lg bg-brand-50 px-3 py-2 text-sm text-brand-800">
                 <p className="whitespace-pre-wrap">{note.body}</p>
                 <p className="mt-1 text-[10px] text-brand-400">
+                  {note.therapist ? `${note.therapist.name}` : "管理者"} ・{" "}
                   {formatDate(note.createdAt)}
                 </p>
               </li>

@@ -44,6 +44,7 @@ model Therapist {
   blogPosts         BlogPost[]
   availabilityRules AvailabilityRule[]
   bookings          Booking[]
+  customerNotes     CustomerNote[]
 }
 
 model Customer {
@@ -99,13 +100,17 @@ model Booking {
   createdAt   DateTime      @default(now())
 }
 
-/// Admin's private notes about a customer. Never shown to the customer.
+/// Private notes about a customer. Never shown to the customer.
+/// therapistId null = written by the admin/owner (visible to admin only).
+/// therapistId set = written by that specific therapist (visible to admin and that therapist only).
 model CustomerNote {
-  id         String   @id @default(cuid())
-  customerId String
-  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  body       String
-  createdAt  DateTime @default(now())
+  id          String     @id @default(cuid())
+  customerId  String
+  customer    Customer   @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  therapistId String?
+  therapist   Therapist? @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  body        String
+  createdAt   DateTime   @default(now())
 }
 
 /// A customer's private notes about a therapist. Never shown to the therapist/admin.

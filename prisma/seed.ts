@@ -139,6 +139,18 @@ async function main() {
     },
   });
 
+  const customer3 = await prisma.customer.upsert({
+    where: { loginId: "customer03" },
+    update: {},
+    create: {
+      loginId: "customer03",
+      passwordHash: await bcrypt.hash("customer1234", 10),
+      name: "鈴木様",
+      phone: "090-2222-3333",
+      email: "suzuki@example.com",
+    },
+  });
+
   await prisma.menuItem.deleteMany();
   const menuItems = await Promise.all(
     [
@@ -236,6 +248,47 @@ async function main() {
         durationMin: 75,
         price: 15000,
         note: "アロマはラベンダーを使用。とてもリラックスされていました。",
+      },
+    ],
+  });
+
+  await prisma.booking.deleteMany();
+  await prisma.booking.createMany({
+    data: [
+      {
+        therapistId: therapists[3].id,
+        customerId: customer.id,
+        menuItemId: menuItems[0].id,
+        startAt: new Date("2026-06-05T14:00:00"),
+        endAt: new Date("2026-06-05T15:00:00"),
+      },
+      {
+        therapistId: therapists[3].id,
+        customerId: customer.id,
+        menuItemId: menuItems[1].id,
+        startAt: new Date("2026-07-10T15:00:00"),
+        endAt: new Date("2026-07-10T16:30:00"),
+      },
+      {
+        therapistId: therapists[3].id,
+        customerId: customer2.id,
+        menuItemId: menuItems[3].id,
+        startAt: new Date("2026-06-20T18:00:00"),
+        endAt: new Date("2026-06-20T19:15:00"),
+      },
+      {
+        therapistId: therapists[3].id,
+        customerId: customer3.id,
+        menuItemId: menuItems[2].id,
+        startAt: new Date("2026-07-25T11:00:00"),
+        endAt: new Date("2026-07-25T11:45:00"),
+      },
+      {
+        therapistId: therapists[3].id,
+        customerId: customer3.id,
+        menuItemId: menuItems[0].id,
+        startAt: new Date("2026-08-05T13:00:00"),
+        endAt: new Date("2026-08-05T14:00:00"),
       },
     ],
   });

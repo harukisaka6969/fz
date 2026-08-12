@@ -119,6 +119,20 @@ export async function deleteOwnBlogPostAction(formData: FormData) {
   revalidatePath("/mypage/blog");
 }
 
+/// A therapist's private note about a customer. Never shown to the customer or other therapists.
+export async function createOwnCustomerNoteAction(formData: FormData) {
+  const therapist = await requireTherapist();
+  const customerId = str(formData, "customerId");
+  const body = str(formData, "body");
+  if (!customerId || !body) return;
+
+  await prisma.customerNote.create({
+    data: { customerId, therapistId: therapist.id, body },
+  });
+
+  revalidatePath("/therapist/calendar");
+}
+
 export async function cancelOwnBookingAction(formData: FormData) {
   const therapist = await requireTherapist();
   const id = str(formData, "id");
