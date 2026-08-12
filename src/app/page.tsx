@@ -23,12 +23,18 @@ export default async function Home() {
           </p>
         )}
 
-        <div className="mt-10 grid w-full max-w-md gap-4 sm:grid-cols-2">
+        <div className="mt-10 grid w-full max-w-md gap-4 sm:grid-cols-3">
           <Link
             href="/login/customer"
             className="rounded-xl bg-brand-600 px-6 py-4 text-sm font-semibold text-white shadow transition hover:bg-brand-700"
           >
             お客様ページへ
+          </Link>
+          <Link
+            href="/login/therapist"
+            className="rounded-xl border border-brand-300 bg-white px-6 py-4 text-sm font-semibold text-brand-700 shadow-sm transition hover:bg-brand-50"
+          >
+            セラピストページへ
           </Link>
           <Link
             href="/login/admin"

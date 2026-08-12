@@ -1,4 +1,4 @@
-import { PrismaClient, DiscountType, InvoiceStatus, SenderType } from "@prisma/client";
+import { PrismaClient, DiscountType, SenderType } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -58,8 +58,34 @@ async function main() {
         workingHours: "平日 12:00〜21:00 / 土日祝 10:00〜19:00",
         sortOrder: 3,
       },
+      {
+        loginId: "nicole",
+        passwordHash: await bcrypt.hash("nicole1234", 10),
+        name: "ニコル",
+        catchCopy: "いつでも笑顔でお迎えします。",
+        bio: "はじめまして、ニコルです。会話を楽しみながら、しっかりコリをほぐす施術が得意です。ご予約はカレンダーからお気軽にどうぞ。",
+        age: 27,
+        height: 165,
+        bodyType: "スレンダー",
+        bloodType: "AB型",
+        areaOfWork: "都内近郊 出張対応",
+        workingHours: "火・木・土 10:00〜18:00",
+        sortOrder: 4,
+      },
     ].map((t) => prisma.therapist.create({ data: t }))
   );
+
+  await prisma.availabilityRule.deleteMany();
+  await prisma.availabilityRule.create({
+    data: {
+      therapistId: therapists[3].id,
+      dayOfWeek: 2,
+      startTime: "10:00",
+      endTime: "18:00",
+      startDate: new Date(),
+      endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+    },
+  });
 
   await prisma.blogPost.createMany({
     data: [
@@ -212,49 +238,6 @@ async function main() {
         note: "アロマはラベンダーを使用。とてもリラックスされていました。",
       },
     ],
-  });
-
-  await prisma.invoice.deleteMany();
-  await prisma.invoice.create({
-    data: {
-      customerId: customer.id,
-      title: "2026年7月15日ご利用分",
-      discount: 1000,
-      status: InvoiceStatus.PAID,
-      issuedAt: new Date("2026-07-15T16:30:00"),
-      paidAt: new Date("2026-07-15T16:35:00"),
-      items: {
-        create: [
-          {
-            menuItemId: menuItems[1].id,
-            name: "ロングコース",
-            price: 17000,
-            quantity: 1,
-          },
-        ],
-      },
-    },
-  });
-
-  await prisma.invoice.create({
-    data: {
-      customerId: customer2.id,
-      title: "2026年7月20日ご利用分",
-      discount: 0,
-      status: InvoiceStatus.UNPAID,
-      issuedAt: new Date("2026-07-20T19:15:00"),
-      dueAt: new Date("2026-07-27T00:00:00"),
-      items: {
-        create: [
-          {
-            menuItemId: menuItems[3].id,
-            name: "アロマリラックスコース",
-            price: 15000,
-            quantity: 1,
-          },
-        ],
-      },
-    },
   });
 
   await prisma.review.deleteMany();

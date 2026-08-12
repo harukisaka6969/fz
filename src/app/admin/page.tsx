@@ -8,14 +8,14 @@ export default async function AdminDashboardPage() {
     orderBy: { createdAt: "desc" },
     include: {
       _count: {
-        select: { invoices: true, histories: true, reviews: true },
+        select: { histories: true, reviews: true },
       },
       messages: {
         where: { sender: "CUSTOMER", readByAdmin: false },
         select: { id: true },
       },
-      invoices: {
-        where: { status: "UNPAID" },
+      bookings: {
+        where: { status: "CONFIRMED", startAt: { gte: new Date() } },
         select: { id: true },
       },
     },
@@ -25,7 +25,7 @@ export default async function AdminDashboardPage() {
     <div className="space-y-8">
       <PageHeader
         title="顧客一覧"
-        description="お客様ごとの施術履歴・請求・メッセージはこちらから確認できます。"
+        description="お客様ごとの施術履歴・予約・メッセージはこちらから確認できます。"
       />
 
       {customers.length === 0 ? (
@@ -58,9 +58,9 @@ export default async function AdminDashboardPage() {
                     </dd>
                   </div>
                   <div className="rounded-lg bg-brand-50 py-2">
-                    <dt className="text-brand-400">未払い</dt>
+                    <dt className="text-brand-400">予約中</dt>
                     <dd className="font-semibold text-brand-800">
-                      {customer.invoices.length}
+                      {customer.bookings.length}
                     </dd>
                   </div>
                   <div className="rounded-lg bg-brand-50 py-2">

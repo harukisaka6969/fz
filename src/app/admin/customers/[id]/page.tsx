@@ -2,15 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { createCustomerNoteAction } from "@/lib/actions/admin-actions";
-import {
-  Card,
-  EmptyState,
-  InvoiceStatusBadge,
-  PageHeader,
-  StarRating,
-  SubmitButton,
-} from "@/components/ui";
-import { formatDate, formatYen } from "@/lib/format";
+import { Card, EmptyState, PageHeader, StarRating, SubmitButton } from "@/components/ui";
+import { formatDate, formatDateTime, formatYen } from "@/lib/format";
 
 export default async function AdminCustomerDetailPage({
   params,
@@ -27,10 +20,10 @@ export default async function AdminCustomerDetailPage({
         take: 5,
         include: { menuItem: true },
       },
-      invoices: {
-        orderBy: { issuedAt: "desc" },
-        take: 5,
-        include: { items: true },
+      bookings: {
+        where: { status: "CONFIRMED", startAt: { gte: new Date() } },
+        orderBy: { startAt: "asc" },
+        include: { therapist: true, menuItem: true },
       },
       reviews: { orderBy: { createdAt: "desc" }, take: 3 },
       messages: { orderBy: { createdAt: "desc" }, take: 3 },
@@ -56,12 +49,6 @@ export default async function AdminCustomerDetailPage({
           className="rounded-full border border-brand-200 bg-white px-4 py-1.5 text-xs font-semibold text-brand-700 hover:bg-brand-100"
         >
           この方の施術履歴を見る
-        </Link>
-        <Link
-          href={`/admin/billing?customer=${customer.id}`}
-          className="rounded-full border border-brand-200 bg-white px-4 py-1.5 text-xs font-semibold text-brand-700 hover:bg-brand-100"
-        >
-          この方の請求を見る
         </Link>
         <Link
           href={`/admin/customers/${customer.id}/messages`}
@@ -126,27 +113,19 @@ export default async function AdminCustomerDetailPage({
       </Card>
 
       <Card>
-        <h2 className="mb-3 text-sm font-bold text-brand-900">直近の請求</h2>
-        {customer.invoices.length === 0 ? (
-          <EmptyState>まだ請求がありません。</EmptyState>
+        <h2 className="mb-3 text-sm font-bold text-brand-900">今後の予約</h2>
+        {customer.bookings.length === 0 ? (
+          <EmptyState>今後の予約はありません。</EmptyState>
         ) : (
           <ul className="space-y-2">
-            {customer.invoices.map((inv) => (
+            {customer.bookings.map((b) => (
               <li
-                key={inv.id}
+                key={b.id}
                 className="flex items-center justify-between rounded-lg bg-brand-50 px-3 py-2 text-sm"
               >
-                <span className="text-brand-800">{inv.title}</span>
-                <span className="flex items-center gap-2">
-                  <InvoiceStatusBadge status={inv.status} />
-                  <span className="font-semibold text-brand-700">
-                    {formatYen(
-                      inv.items.reduce(
-                        (sum, i) => sum + i.price * i.quantity,
-                        0
-                      ) - inv.discount
-                    )}
-                  </span>
+                <span className="text-brand-800">
+                  {formatDateTime(b.startAt)} ・ {b.therapist.name} ・{" "}
+                  {b.menuItem?.name ?? "施術"}
                 </span>
               </li>
             ))}

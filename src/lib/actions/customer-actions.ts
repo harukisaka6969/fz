@@ -50,3 +50,47 @@ export async function createTherapistNoteAction(formData: FormData) {
 
   revalidatePath(`/mypage/therapists/${therapistId}`);
 }
+
+export async function bookSlotAction(formData: FormData) {
+  const customer = await requireCustomer();
+  const therapistId = String(formData.get("therapistId") ?? "").trim();
+  const menuItemId = String(formData.get("menuItemId") ?? "").trim();
+  const startAtRaw = String(formData.get("startAt") ?? "").trim();
+  const endAtRaw = String(formData.get("endAt") ?? "").trim();
+  if (!therapistId || !menuItemId || !startAtRaw || !endAtRaw) return;
+
+  const startAt = new Date(startAtRaw);
+  const endAt = new Date(endAtRaw);
+
+  const overlapping = await prisma.booking.findFirst({
+    where: {
+      therapistId,
+      status: "CONFIRMED",
+      startAt: { lt: endAt },
+      endAt: { gt: startAt },
+    },
+  });
+  if (overlapping) return;
+
+  await prisma.booking.create({
+    data: { therapistId, customerId: customer.id, menuItemId, startAt, endAt },
+  });
+
+  revalidatePath("/mypage/book");
+  revalidatePath("/therapist/calendar");
+}
+
+export async function cancelBookingAction(formData: FormData) {
+  const customer = await requireCustomer();
+  const id = String(formData.get("id") ?? "").trim();
+
+  await prisma.booking
+    .updateMany({
+      where: { id, customerId: customer.id },
+      data: { status: "CANCELED" },
+    })
+    .catch(() => {});
+
+  revalidatePath("/mypage/book");
+  revalidatePath("/therapist/calendar");
+}

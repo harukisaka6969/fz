@@ -21,7 +21,6 @@ export default async function AdminLayout({
     { href: "/admin/reviews", label: "レビュー" },
     { href: "/admin/blog", label: "ブログ" },
     { href: "/admin/messages", label: "メッセージ", badge: unreadMessages },
-    { href: "/admin/billing", label: "請求" },
     { href: "/admin/history", label: "施術履歴" },
   ];
 

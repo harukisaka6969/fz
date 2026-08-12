@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "めぐ Personal Salon",
-  description: "個人セラピストの予約・メッセージ・請求管理ポータル",
+  description: "個人セラピストの予約・メッセージ管理ポータル",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -48,30 +48,6 @@ export function StarRating({ rating }: { rating: number }) {
   );
 }
 
-const STATUS_STYLES: Record<string, string> = {
-  UNPAID: "bg-amber-100 text-amber-700",
-  PAID: "bg-emerald-100 text-emerald-700",
-  CANCELED: "bg-neutral-200 text-neutral-600",
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  UNPAID: "未払い",
-  PAID: "支払済み",
-  CANCELED: "キャンセル",
-};
-
-export function InvoiceStatusBadge({ status }: { status: string }) {
-  return (
-    <span
-      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-        STATUS_STYLES[status] ?? "bg-neutral-100 text-neutral-600"
-      }`}
-    >
-      {STATUS_LABELS[status] ?? status}
-    </span>
-  );
-}
-
 export function SubmitButton({
   children,
   pending,

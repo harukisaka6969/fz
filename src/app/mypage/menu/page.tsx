@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Card, EmptyState, PageHeader } from "@/components/ui";
 import { formatYen } from "@/lib/format";
@@ -24,6 +25,12 @@ export default async function MypageMenuPage() {
                 <span>{item.durationMin}分</span>
                 <span>{formatYen(item.price)}</span>
               </p>
+              <Link
+                href={`/mypage/book?menu=${item.id}`}
+                className="mt-3 block rounded-full bg-brand-600 px-4 py-2 text-center text-xs font-semibold text-white hover:bg-brand-700"
+              >
+                このメニューで予約する
+              </Link>
             </Card>
           ))}
         </div>

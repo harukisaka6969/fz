@@ -24,3 +24,16 @@ export function formatDateTime(date: Date | string): string {
     minute: "2-digit",
   }).format(d);
 }
+
+export function formatWeekday(date: Date | string): string {
+  const d = typeof date === "string" ? new Date(date) : date;
+  return new Intl.DateTimeFormat("ja-JP", { weekday: "short" }).format(d);
+}
+
+export function formatTime(date: Date | string): string {
+  const d = typeof date === "string" ? new Date(date) : date;
+  return new Intl.DateTimeFormat("ja-JP", {
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(d);
+}

@@ -20,9 +20,9 @@ export default async function MypageLayout({
   const tabs = [
     { href: "/mypage", label: "セラピスト" },
     { href: "/mypage/menu", label: "施術メニュー" },
+    { href: "/mypage/book", label: "予約" },
     { href: "/mypage/coupons", label: "クーポン" },
     { href: "/mypage/history", label: "施術履歴" },
-    { href: "/mypage/billing", label: "請求" },
     { href: "/mypage/reviews", label: "レビュー" },
     { href: "/mypage/blog", label: "ブログ" },
     { href: "/mypage/messages", label: "メッセージ", badge: unreadMessages },

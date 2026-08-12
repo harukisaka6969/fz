@@ -19,6 +19,9 @@ model Admin {
 
 model Therapist {
   id           String   @id @default(cuid())
+  /// Set only for therapists onboarded with their own login (prototype: blank password bypass).
+  loginId      String?  @unique
+  passwordHash String?
   name         String
   catchCopy    String
   bio          String
@@ -34,8 +37,10 @@ model Therapist {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  notes     TherapistNote[]
-  blogPosts BlogPost[]
+  notes             TherapistNote[]
+  blogPosts         BlogPost[]
+  availabilityRules AvailabilityRule[]
+  bookings          Booking[]
 }
 
 model Customer {
@@ -48,12 +53,47 @@ model Customer {
   createdAt    DateTime @default(now())
 
   coupons        Coupon[]
-  invoices       Invoice[]
   histories      TreatmentHistory[]
   reviews        Review[]
   messages       Message[]
   notes          CustomerNote[]
   therapistNotes TherapistNote[]
+  bookings       Booking[]
+}
+
+/// A therapist's recurring weekly availability window, valid for a finite date range.
+model AvailabilityRule {
+  id          String    @id @default(cuid())
+  therapistId String
+  therapist   Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  /// 0 = Sunday .. 6 = Saturday
+  dayOfWeek   Int
+  /// "HH:mm" local wall-clock time
+  startTime   String
+  endTime     String
+  startDate   DateTime
+  endDate     DateTime
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELED
+}
+
+model Booking {
+  id          String        @id @default(cuid())
+  therapistId String
+  therapist   Therapist     @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  customerId  String
+  customer    Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  menuItemId  String?
+  menuItem    MenuItem?     @relation(fields: [menuItemId], references: [id])
+  startAt     DateTime
+  endAt       DateTime
+  status      BookingStatus @default(CONFIRMED)
+  createdAt   DateTime      @default(now())
 }
 
 /// Admin's private notes about a customer. Never shown to the customer.
@@ -97,8 +137,8 @@ model MenuItem {
   sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
 
-  invoiceItems       InvoiceItem[]
   treatmentHistories TreatmentHistory[]
+  bookings           Booking[]
 }
 
 enum DiscountType {
@@ -119,37 +159,6 @@ model Coupon {
   customerId    String?
   customer      Customer?    @relation(fields: [customerId], references: [id], onDelete: Cascade)
   createdAt     DateTime     @default(now())
-}
-
-enum InvoiceStatus {
-  UNPAID
-  PAID
-  CANCELED
-}
-
-model Invoice {
-  id         String        @id @default(cuid())
-  customerId String
-  customer   Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  title      String
-  discount   Int           @default(0)
-  status     InvoiceStatus @default(UNPAID)
-  issuedAt   DateTime      @default(now())
-  dueAt      DateTime?
-  paidAt     DateTime?
-  note       String?
-  items      InvoiceItem[]
-}
-
-model InvoiceItem {
-  id         String    @id @default(cuid())
-  invoiceId  String
-  invoice    Invoice   @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  menuItemId String?
-  menuItem   MenuItem? @relation(fields: [menuItemId], references: [id])
-  name       String
-  price      Int
-  quantity   Int       @default(1)
 }
 
 model TreatmentHistory {

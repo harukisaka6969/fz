@@ -28,6 +28,20 @@ export async function requireCustomer() {
   return customer;
 }
 
+export async function requireTherapist() {
+  const session = await getSession();
+  if (!session || session.role !== "therapist") {
+    redirect("/login/therapist");
+  }
+  const therapist = await prisma.therapist.findUnique({
+    where: { id: session.id },
+  });
+  if (!therapist) {
+    redirect("/login/therapist");
+  }
+  return therapist;
+}
+
 export async function getCurrentSession() {
   return getSession();
 }

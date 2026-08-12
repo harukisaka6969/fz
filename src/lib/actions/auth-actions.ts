@@ -55,6 +55,32 @@ export async function loginCustomerAction(
   redirect("/mypage");
 }
 
+// プロトタイプ検証用に、未入力での通過を許容している。本番公開前に必ず削除すること。
+export async function loginTherapistAction(
+  _prevState: LoginState,
+  formData: FormData
+): Promise<LoginState> {
+  const loginId = String(formData.get("loginId") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
+
+  const therapist = loginId
+    ? await prisma.therapist.findUnique({ where: { loginId } })
+    : await prisma.therapist.findFirst({
+        where: { loginId: { not: null } },
+        orderBy: { sortOrder: "asc" },
+      });
+
+  if (!therapist || !therapist.passwordHash) {
+    return { error: "セラピストアカウントが見つかりません。" };
+  }
+  if (password && !(await verifyPassword(password, therapist.passwordHash))) {
+    return { error: "ログインIDまたはパスワードが正しくありません。" };
+  }
+
+  await createSession("therapist", therapist.id);
+  redirect("/therapist");
+}
+
 export async function logoutAction() {
   await destroySession();
   redirect("/");

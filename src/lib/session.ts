@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 const COOKIE_NAME = "fz_session";
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 30; // 30 days
 
-export type SessionRole = "admin" | "customer";
+export type SessionRole = "admin" | "customer" | "therapist";
 
 export type SessionPayload = {
   role: SessionRole;

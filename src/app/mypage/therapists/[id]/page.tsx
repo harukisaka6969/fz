@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireCustomer } from "@/lib/auth";
@@ -83,6 +84,13 @@ export default async function MypageTherapistDetailPage({
             SNSをチェックする →
           </a>
         )}
+
+        <Link
+          href={`/mypage/book?therapist=${therapist.id}`}
+          className="mt-5 block rounded-full bg-brand-600 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-brand-700"
+        >
+          {therapist.name} さんに予約する
+        </Link>
       </Card>
 
       <Card>

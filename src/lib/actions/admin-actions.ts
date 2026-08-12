@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { hashPassword } from "@/lib/password";
-import { InvoiceStatus } from "@prisma/client";
 
 function str(formData: FormData, key: string): string {
   return String(formData.get(key) ?? "").trim();
@@ -303,63 +302,6 @@ export async function markMessagesReadByAdminAction(customerId: string) {
     where: { customerId, sender: "CUSTOMER", readByAdmin: false },
     data: { readByAdmin: true },
   });
-}
-
-// ---------- Billing ----------
-
-export async function createInvoiceAction(formData: FormData) {
-  await requireAdmin();
-
-  const customerId = str(formData, "customerId");
-  const itemName = str(formData, "itemName");
-  const itemPrice = num(formData, "itemPrice");
-  const quantity = num(formData, "quantity") || 1;
-  if (!customerId || !itemName || !itemPrice) return;
-
-  const dueAtRaw = str(formData, "dueAt");
-
-  await prisma.invoice.create({
-    data: {
-      customerId,
-      title: str(formData, "title") || itemName,
-      discount: num(formData, "discount") || 0,
-      dueAt: dueAtRaw ? new Date(dueAtRaw) : null,
-      note: str(formData, "note") || null,
-      items: {
-        create: [{ name: itemName, price: itemPrice, quantity }],
-      },
-    },
-  });
-
-  revalidatePath("/admin/billing");
-  revalidatePath(`/admin/customers/${customerId}`);
-  revalidatePath("/mypage/billing");
-}
-
-export async function updateInvoiceStatusAction(formData: FormData) {
-  await requireAdmin();
-  const id = str(formData, "id");
-  const status = str(formData, "status");
-  if (!id || !["UNPAID", "PAID", "CANCELED"].includes(status)) return;
-
-  await prisma.invoice.update({
-    where: { id },
-    data: {
-      status: status as InvoiceStatus,
-      paidAt: status === "PAID" ? new Date() : null,
-    },
-  });
-
-  revalidatePath("/admin/billing");
-  revalidatePath("/mypage/billing");
-}
-
-export async function deleteInvoiceAction(formData: FormData) {
-  await requireAdmin();
-  const id = str(formData, "id");
-  await prisma.invoice.delete({ where: { id } }).catch(() => {});
-  revalidatePath("/admin/billing");
-  revalidatePath("/mypage/billing");
 }
 
 // ---------- Treatment history ----------
