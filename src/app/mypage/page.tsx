@@ -1,10 +1,16 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { requireCustomer } from "@/lib/auth";
 import { Card, EmptyState, PageHeader } from "@/components/ui";
 
 export default async function MypageTherapistsPage() {
+  const customer = await requireCustomer();
+
   const therapists = await prisma.therapist.findMany({
-    where: { isVerified: true },
+    where: {
+      isVerified: true,
+      registeredCustomers: { some: { customerId: customer.id } },
+    },
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
   });
 

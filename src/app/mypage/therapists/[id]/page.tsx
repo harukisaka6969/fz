@@ -14,15 +14,18 @@ export default async function MypageTherapistDetailPage({
   const { id } = await params;
   const customer = await requireCustomer();
 
-  const [therapist, notes] = await Promise.all([
+  const [therapist, notes, registration] = await Promise.all([
     prisma.therapist.findUnique({ where: { id } }),
     prisma.therapistNote.findMany({
       where: { therapistId: id, customerId: customer.id },
       orderBy: { createdAt: "desc" },
     }),
+    prisma.therapistCustomer.findUnique({
+      where: { therapistId_customerId: { therapistId: id, customerId: customer.id } },
+    }),
   ]);
 
-  if (!therapist || !therapist.isVerified) notFound();
+  if (!therapist || !therapist.isVerified || !registration) notFound();
 
   const details = [
     ["年齢", therapist.age ? `${therapist.age}歳` : null],

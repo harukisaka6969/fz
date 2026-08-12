@@ -10,6 +10,7 @@ export default async function TherapistLayout({
 
   const tabs = [
     { href: "/therapist", label: "プロフィール" },
+    { href: "/therapist/customers", label: "お客様" },
     { href: "/therapist/calendar", label: "カレンダー" },
     { href: "/therapist/blog", label: "ブログ" },
   ];

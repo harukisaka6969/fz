@@ -44,6 +44,11 @@ export async function createTherapistNoteAction(formData: FormData) {
   const body = String(formData.get("body") ?? "").trim();
   if (!therapistId || !body) return;
 
+  const registration = await prisma.therapistCustomer.findUnique({
+    where: { therapistId_customerId: { therapistId, customerId: customer.id } },
+  });
+  if (!registration) return;
+
   await prisma.therapistNote.create({
     data: { customerId: customer.id, therapistId, body },
   });
@@ -61,6 +66,11 @@ export async function bookSlotAction(formData: FormData) {
 
   const therapist = await prisma.therapist.findUnique({ where: { id: therapistId } });
   if (!therapist || !therapist.isVerified) return;
+
+  const registration = await prisma.therapistCustomer.findUnique({
+    where: { therapistId_customerId: { therapistId, customerId: customer.id } },
+  });
+  if (!registration) return;
 
   const startAt = new Date(startAtRaw);
   const endAt = new Date(endAtRaw);

@@ -133,6 +133,58 @@ export async function createOwnCustomerNoteAction(formData: FormData) {
   revalidatePath("/therapist/calendar");
 }
 
+export type RegisterCustomerState = {
+  error?: string;
+  success?: string;
+};
+
+/// Registers a customer (found by email) so they can see this therapist. Without
+/// this link the customer cannot see the therapist at all, even if she is verified.
+export async function registerCustomerByEmailAction(
+  _prevState: RegisterCustomerState,
+  formData: FormData
+): Promise<RegisterCustomerState> {
+  const therapist = await requireTherapist();
+  const email = str(formData, "email").toLowerCase();
+  if (!email) {
+    return { error: "メールアドレスを入力してください。" };
+  }
+
+  const customer = await prisma.customer.findFirst({
+    where: { email: { equals: email, mode: "insensitive" } },
+  });
+  if (!customer) {
+    return { error: "そのメールアドレスのお客様は見つかりませんでした。" };
+  }
+
+  const existing = await prisma.therapistCustomer.findUnique({
+    where: { therapistId_customerId: { therapistId: therapist.id, customerId: customer.id } },
+  });
+  if (existing) {
+    return { error: `${customer.name} はすでに登録済みです。` };
+  }
+
+  await prisma.therapistCustomer.create({
+    data: { therapistId: therapist.id, customerId: customer.id },
+  });
+
+  revalidatePath("/therapist/customers");
+  return { success: `${customer.name} を登録しました。` };
+}
+
+export async function unregisterCustomerAction(formData: FormData) {
+  const therapist = await requireTherapist();
+  const customerId = str(formData, "customerId");
+
+  await prisma.therapistCustomer
+    .delete({
+      where: { therapistId_customerId: { therapistId: therapist.id, customerId } },
+    })
+    .catch(() => {});
+
+  revalidatePath("/therapist/customers");
+}
+
 export async function cancelOwnBookingAction(formData: FormData) {
   const therapist = await requireTherapist();
   const id = str(formData, "id");

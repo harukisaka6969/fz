@@ -40,11 +40,12 @@ model Therapist {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  notes             TherapistNote[]
-  blogPosts         BlogPost[]
-  availabilityRules AvailabilityRule[]
-  bookings          Booking[]
-  customerNotes     CustomerNote[]
+  notes               TherapistNote[]
+  blogPosts           BlogPost[]
+  availabilityRules   AvailabilityRule[]
+  bookings            Booking[]
+  customerNotes       CustomerNote[]
+  registeredCustomers TherapistCustomer[]
 }
 
 model Customer {
@@ -56,13 +57,28 @@ model Customer {
   email        String?
   createdAt    DateTime @default(now())
 
-  coupons        Coupon[]
-  histories      TreatmentHistory[]
-  reviews        Review[]
-  messages       Message[]
-  notes          CustomerNote[]
-  therapistNotes TherapistNote[]
-  bookings       Booking[]
+  coupons                Coupon[]
+  histories              TreatmentHistory[]
+  reviews                Review[]
+  messages               Message[]
+  notes                  CustomerNote[]
+  therapistNotes         TherapistNote[]
+  bookings               Booking[]
+  registeredByTherapists TherapistCustomer[]
+}
+
+/// A therapist has registered this customer (by email) as allowed to view her
+/// profile, book with her, and read her blog. Without this link the customer
+/// cannot see the therapist at all, even if she is verified.
+model TherapistCustomer {
+  id          String    @id @default(cuid())
+  therapistId String
+  therapist   Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  customerId  String
+  customer    Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+
+  @@unique([therapistId, customerId])
 }
 
 /// A therapist's recurring weekly availability window, valid for a finite date range.

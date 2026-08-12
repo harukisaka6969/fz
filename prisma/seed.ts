@@ -252,6 +252,15 @@ async function main() {
     ],
   });
 
+  await prisma.therapistCustomer.deleteMany();
+  await prisma.therapistCustomer.createMany({
+    data: [
+      { therapistId: therapists[3].id, customerId: customer.id },
+      { therapistId: therapists[3].id, customerId: customer2.id },
+      { therapistId: therapists[3].id, customerId: customer3.id },
+    ],
+  });
+
   await prisma.booking.deleteMany();
   await prisma.booking.createMany({
     data: [

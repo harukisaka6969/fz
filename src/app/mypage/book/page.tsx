@@ -16,7 +16,10 @@ export default async function MypageBookPage({
 
   const [therapists, menuItems, myBookings] = await Promise.all([
     prisma.therapist.findMany({
-      where: { isVerified: true },
+      where: {
+        isVerified: true,
+        registeredCustomers: { some: { customerId: customer.id } },
+      },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     }),
     prisma.menuItem.findMany({ where: { isActive: true }, orderBy: { sortOrder: "asc" } }),
@@ -27,11 +30,16 @@ export default async function MypageBookPage({
     }),
   ]);
 
+  const registeredTherapistIds = therapists.map((t) => t.id);
+  const candidateTherapistIds = therapistId
+    ? registeredTherapistIds.filter((id) => id === therapistId)
+    : registeredTherapistIds;
+
   const selectedMenuItem = menuItems.find((m) => m.id === menuItemId);
 
   const slots = selectedMenuItem
     ? await getAvailableSlots({
-        therapistId: therapistId || undefined,
+        therapistIds: candidateTherapistIds,
         durationMin: selectedMenuItem.durationMin,
       })
     : [];

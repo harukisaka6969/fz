@@ -17,21 +17,25 @@ function startOfDay(date: Date): Date {
 }
 
 export async function getAvailableSlots({
-  therapistId,
+  therapistIds,
   durationMin,
   daysAhead = DEFAULT_DAYS_AHEAD,
 }: {
-  therapistId?: string;
+  /// Restricts candidate therapists (e.g. to only those the customer is registered
+  /// with). Pass an empty array to yield no slots; omit to consider all verified therapists.
+  therapistIds?: string[];
   durationMin: number;
   daysAhead?: number;
 }): Promise<OpenSlot[]> {
+  if (therapistIds && therapistIds.length === 0) return [];
+
   const now = new Date();
   const rangeEnd = new Date(now.getTime() + daysAhead * 24 * 60 * 60 * 1000);
 
   const rules = await prisma.availabilityRule.findMany({
     where: {
       isActive: true,
-      ...(therapistId ? { therapistId } : {}),
+      ...(therapistIds ? { therapistId: { in: therapistIds } } : {}),
       startDate: { lte: rangeEnd },
       endDate: { gte: now },
       therapist: { isVerified: true },
@@ -41,10 +45,10 @@ export async function getAvailableSlots({
 
   if (rules.length === 0) return [];
 
-  const therapistIds = [...new Set(rules.map((r) => r.therapistId))];
+  const involvedTherapistIds = [...new Set(rules.map((r) => r.therapistId))];
   const bookings = await prisma.booking.findMany({
     where: {
-      therapistId: { in: therapistIds },
+      therapistId: { in: involvedTherapistIds },
       status: "CONFIRMED",
       startAt: { lte: rangeEnd },
       endAt: { gte: now },

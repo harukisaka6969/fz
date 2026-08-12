@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { requireCustomer } from "@/lib/auth";
 import { Card, PageHeader } from "@/components/ui";
 import { formatDate } from "@/lib/format";
 
@@ -9,12 +10,22 @@ export default async function MypageBlogDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const customer = await requireCustomer();
+
   const post = await prisma.blogPost.findUnique({
     where: { id },
     include: { therapist: true },
   });
 
-  if (!post || !post.isPublished || !post.therapist.isVerified) notFound();
+  const isRegistered = post
+    ? await prisma.therapistCustomer.findUnique({
+        where: {
+          therapistId_customerId: { therapistId: post.therapistId, customerId: customer.id },
+        },
+      })
+    : null;
+
+  if (!post || !post.isPublished || !post.therapist.isVerified || !isRegistered) notFound();
 
   return (
     <div className="space-y-6">
